@@ -167,9 +167,10 @@ extension MaterialShowcase {
   }
   
   /// Sets a UITableViewCell as target
-  @objc public func setTargetView(tableView: UITableView, section: Int, row: Int) {
+  @objc public func setTargetView(tableView: UITableView, section: Int, row: Int, tapThrough: (() -> Void)? = nil) {
     let indexPath = IndexPath(row: row, section: section)
     targetView = tableView.cellForRow(at: indexPath)?.contentView
+    onTapThrough = tapThrough
     // for table viewcell, we do not need target holder (circle view)
     // therefore, set its radius = 0
     targetHolderRadius = 0
@@ -177,9 +178,10 @@ extension MaterialShowcase {
   
   
   /// Sets a UICollectionViewCell as target
-  @objc public func setTargetView(collectionView: UICollectionView, section: Int, item: Int) {
+  @objc public func setTargetView(collectionView: UICollectionView, section: Int, item: Int, tapThrough: (() -> Void)? = nil) {
     let indexPath = IndexPath(item: item, section: section)
     targetView = collectionView.cellForItem(at: indexPath)
+    onTapThrough = tapThrough
     // for table viewcell, we do not need target holder (circle view)
     // therefore, set its radius = 0
     targetHolderRadius = 0
