@@ -44,7 +44,8 @@ extension MaterialShowcase {
     
     let textRadius = maxDistance(from: center, to: textBounds)
     let targetRadius = maxDistance(from: center, to: expandedBounds)
-    return max(textRadius, targetRadius) + 40
+    let additionalRadius = maxDistance(from: CGPoint(x: targetCenterX, y: targetCenterY), to: textBounds)
+    return max(textRadius, targetRadius, additionalRadius) + 10
   }
   
   func maxDistance(from point: CGPoint, to rect: CGRect) -> CGFloat {
