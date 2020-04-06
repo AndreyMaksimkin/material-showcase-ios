@@ -24,8 +24,10 @@ open class MaterialShowcase: UIView {
   let TARGET_HOLDER_RADIUS: CGFloat = 44
   let TEXT_CENTER_OFFSET: CGFloat = 44 + 20
   let INSTRUCTIONS_CENTER_OFFSET: CGFloat = 20
-  let LABEL_MARGIN: CGFloat = 40
-  let TARGET_PADDING: CGFloat = 20
+  let LABEL_MARGIN: CGFloat = 16
+  let TARGET_PADDING: CGFloat = 16
+  let TARGET_BOTTOM_PADDING: CGFloat = 33
+  let TARGET_TOP_PADDING: CGFloat = 77
   
   // Other default properties
   let LABEL_DEFAULT_HEIGHT: CGFloat = 50
@@ -203,11 +205,7 @@ extension MaterialShowcase {
     
     backgroundView.transform = CGAffineTransform(scaleX: scale, y: scale) // Initial set to support animation
     backgroundView.center = targetHolderView.center
-    
-    
-    
-    
-    
+
     if hasSkipButton {
       
       closeButton = UIButton()
@@ -223,7 +221,6 @@ extension MaterialShowcase {
       closeButton.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.13).isActive = true
       closeButton.heightAnchor.constraint(equalTo: closeButton.widthAnchor, multiplier: 1.0/1.0).isActive = true
     }
-
     
     if hasShadow {
       backgroundView.layer.shadowColor = UIColor.black.cgColor
@@ -330,18 +327,11 @@ extension MaterialShowcase {
       addTarget(at: center)
     }
     
-    //In iPad version InstructionView was add to backgroundView
-    if UIDevice.current.userInterfaceIdiom == .pad {
-      addBackground()
-    }
-    
-    addInstructionView(at: center)
+    addInstructionView()
+    calculateContainerPosition(at: center)
     instructionView.layoutIfNeeded()
     
-    //In iPhone version InstructionView was add to self view
-    if UIDevice.current.userInterfaceIdiom != .pad {
-      addBackground()
-    }
+    addBackground()
     
     // Disable subview interaction to let users click to general view only
     subviews.forEach({$0.isUserInteractionEnabled = false})
@@ -375,8 +365,6 @@ extension MaterialShowcase {
       backgroundView.center = center
       backgroundView.asCircle()
       
-      
-      
     case .full:
       backgroundView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width,height: UIScreen.main.bounds.height))
     }
@@ -384,18 +372,10 @@ extension MaterialShowcase {
     
     backgroundView.backgroundColor = backgroundPromptColor.withAlphaComponent(backgroundPromptColorAlpha)
     insertSubview(backgroundView, belowSubview: targetRippleView)
-    
-//    addBackgroundMask(with: targetHolderRadius, in: backgroundView)
   }
   
   private func getDefaultBackgroundRadius() -> CGFloat {
-    var radius: CGFloat = 0.0
-    if UIDevice.current.userInterfaceIdiom == .pad {
-      radius = 300.0
-    } else {
-      radius = getOuterCircleRadius(center: center, textBounds: instructionView.frame, targetBounds: targetRippleView.frame)
-    }
-    return radius
+    return getOuterCircleRadius(center: center, textBounds: instructionView.frame, targetBounds: targetRippleView.frame)
   }
   
   private func addBackgroundMask(with radius: CGFloat, in view: UIView) {
@@ -474,7 +454,7 @@ extension MaterialShowcase {
   }
   
   /// Configures and adds primary label view
-  private func addInstructionView(at center: CGPoint) {
+  private func addInstructionView() {
     instructionView = MaterialShowcaseInstructionView()
     
     instructionView.primaryTextAlignment = primaryTextAlignment
@@ -489,54 +469,33 @@ extension MaterialShowcase {
     instructionView.secondaryTextColor = secondaryTextColor
     instructionView.secondaryText = secondaryText
     
+    addSubview(instructionView)
+  }
+  
+  private func calculateContainerPosition(at center: CGPoint) {
     // Calculate x position
-    var xPosition = LABEL_MARGIN
-    
+    let xPosition = LABEL_MARGIN
+          
     // Calculate y position
     var yPosition: CGFloat!
-    
+          
     // Calculate instructionView width
     var width : CGFloat
     
-    if UIDevice.current.userInterfaceIdiom == .pad {
-      width = backgroundView.frame.width - xPosition
-      
-      if backgroundView.frame.origin.x < 0 {
-        xPosition = abs(backgroundView.frame.origin.x) + xPosition
-      } else if (backgroundView.frame.origin.x + backgroundView.frame.size.width >
-        UIScreen.main.bounds.width) {
-        width = backgroundView.frame.size.width - (xPosition*2)
-      }
-      if xPosition + width > backgroundView.frame.size.width {
-        width = width - CGFloat(xPosition/2)
-      }
-      
-      if getTargetPosition(target: targetView, container: containerView) == .above {
-        yPosition = (backgroundView.frame.size.height/2) + TEXT_CENTER_OFFSET
-      } else {
-        yPosition = TEXT_CENTER_OFFSET + LABEL_DEFAULT_HEIGHT * 2
-      }
+    if getTargetPosition(target: targetView, container: containerView) == .above {
+      yPosition = center.y + TARGET_BOTTOM_PADDING +  (targetView.bounds.height / 2 > targetHolderRadius ? targetView.bounds.height / 2 : targetHolderRadius)
     } else {
-      if getTargetPosition(target: targetView, container: containerView) == .above {
-        yPosition = center.y + TARGET_PADDING +  (targetView.bounds.height / 2 > targetHolderRadius ? targetView.bounds.height / 2 : targetHolderRadius)
-      } else {
-        yPosition = center.y - TEXT_CENTER_OFFSET - LABEL_DEFAULT_HEIGHT * 2
-      }
-      
-      width = containerView.frame.width - (xPosition + xPosition)
+      yPosition = center.y - targetView.bounds.height / 2 - TARGET_TOP_PADDING - instructionView.bounds.size.height
     }
-    
+            
+    width = containerView.frame.width - (xPosition + xPosition)
+          
     instructionView.frame = CGRect(x: xPosition,
                                    y: yPosition,
                                    width: width ,
-                                   height: 0)
-    if UIDevice.current.userInterfaceIdiom == .pad {
-      backgroundView.addSubview(instructionView)
-    } else {
-      addSubview(instructionView)
-    }
+                                   height: instructionView.bounds.size.height)
   }
-  
+
   /// Handles user's tap
   private func tapGestureRecoganizer() -> UIGestureRecognizer {
     let tapGesture = UITapGestureRecognizer(target: self, action: #selector(MaterialShowcase.tapGestureSelector))
@@ -616,8 +575,6 @@ extension MaterialShowcase {
       return .below
     }
   }
-  
-  
   
   // Calculates the center point based on targetview
   func calculateCenter(at targetView: UIView, to containerView: UIView) -> CGPoint {

@@ -37,15 +37,24 @@ extension MaterialShowcase {
   func getOuterCircleRadius(center: CGPoint, textBounds: CGRect, targetBounds: CGRect) -> CGFloat {
     let targetCenterX = targetBounds.midX
     let targetCenterY = targetBounds.midY
+    let targetCenter = CGPoint(x: targetCenterX, y: targetCenterY)
     
     let expandedRadius = 1.1 * TARGET_HOLDER_RADIUS
     var expandedBounds = CGRect(x: targetCenterX, y: targetCenterY, width: 0, height: 0)
     expandedBounds = expandedBounds.insetBy(dx: -expandedRadius, dy: -expandedRadius);
     
-    let textRadius = maxDistance(from: center, to: textBounds)
+    let textRadius = maxDistance(from: center, to: textBounds) + 10
     let targetRadius = maxDistance(from: center, to: expandedBounds)
-    let additionalRadius = maxDistance(from: CGPoint(x: targetCenterX, y: targetCenterY), to: textBounds)
-    return max(textRadius, targetRadius, additionalRadius) + 10
+    let additionalRadius = maxDistance(from: CGPoint(x: targetCenterX, y: targetCenterY), to: textBounds) + 20
+    
+    //Screen coordinates
+    let leftTopPoint = CGPoint(x: 0, y: 0)
+    let leftBottomPoint = CGPoint(x: 0, y: frame.size.height)
+    
+    let screenRadius = min(distance(leftTopPoint, targetCenter),
+                           distance(leftBottomPoint, targetCenter))
+    
+    return max(textRadius, targetRadius, additionalRadius, screenRadius)
   }
   
   func maxDistance(from point: CGPoint, to rect: CGRect) -> CGFloat {
