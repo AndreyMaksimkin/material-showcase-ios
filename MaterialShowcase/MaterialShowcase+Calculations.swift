@@ -50,9 +50,16 @@ extension MaterialShowcase {
     //Screen coordinates
     let leftTopPoint = CGPoint(x: 0, y: 0)
     let leftBottomPoint = CGPoint(x: 0, y: frame.size.height)
+    let rightTopPoint = CGPoint(x: frame.size.width, y: 0)
+    let rightBottomPoint = CGPoint(x: frame.size.width, y: frame.size.height)
     
-    let screenRadius = min(distance(leftTopPoint, targetCenter),
-                           distance(leftBottomPoint, targetCenter))
+    let topDistance = max(distance(leftTopPoint, targetCenter),
+                          distance(rightTopPoint, targetCenter))
+    
+    let bottomDistance = max(distance(leftBottomPoint, targetCenter),
+                             distance(rightBottomPoint, targetCenter))
+    
+    let screenRadius = min(topDistance, bottomDistance)
     
     return max(textRadius, targetRadius, additionalRadius, screenRadius)
   }
