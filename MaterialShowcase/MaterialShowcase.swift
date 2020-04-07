@@ -455,7 +455,11 @@ extension MaterialShowcase {
   
   /// Configures and adds primary label view
   private func addInstructionView() {
-    instructionView = MaterialShowcaseInstructionView()
+    let frame = CGRect(x: LABEL_MARGIN,
+      y: 0,
+      width: UIScreen.main.bounds.width - 2 * LABEL_MARGIN,
+      height: 0)
+    instructionView = MaterialShowcaseInstructionView(frame: frame)
     
     instructionView.primaryTextAlignment = primaryTextAlignment
     instructionView.primaryTextFont = primaryTextFont
