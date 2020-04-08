@@ -361,8 +361,14 @@ extension MaterialShowcase {
       }
       
       let center = targetRippleView.center
-      backgroundView = UIView(frame: CGRect(x: 0, y: 0, width: radius * 2,height: radius * 2))
-      backgroundView.center = center
+      var  dy: CGFloat = abs(center.y - UIScreen.main.bounds.height / 2) < 50 ? 50 : 0
+      
+      if getTargetPosition(target: targetView, container: containerView) == .above {
+         dy *= -1
+      }
+
+      backgroundView = UIView(frame: CGRect(x: 0, y: dy, width: radius * 2,height: radius * 2))
+      backgroundView.center = CGPoint(x: center.x, y: center.y + dy / 2)
       backgroundView.asCircle()
       
     case .full:
