@@ -19,6 +19,16 @@ open class MaterialShowcase: UIView {
     case full//full screen
   }
   
+  enum ImagePosition {
+      case left
+      case right
+  }
+  
+  struct CharacterPosition {
+      let leftImage: UIImage?
+      let rightImage: UIImage?
+  }
+  
   // MARK: Material design guideline constant
   let BACKGROUND_PROMPT_ALPHA: CGFloat = 0.96
   let TARGET_HOLDER_RADIUS: CGFloat = 44
@@ -28,6 +38,7 @@ open class MaterialShowcase: UIView {
   let TARGET_PADDING: CGFloat = 16
   let TARGET_BOTTOM_PADDING: CGFloat = 33
   let TARGET_TOP_PADDING: CGFloat = 77
+  let IMAGE_SIZE = CGSize(width: 100, height: 200)
   
   // Other default properties
   let LABEL_DEFAULT_HEIGHT: CGFloat = 50
@@ -55,7 +66,8 @@ open class MaterialShowcase: UIView {
   var targetRippleView: UIView!
   var targetCopyView: UIView!
   var instructionView: MaterialShowcaseInstructionView!
-  
+  var characterImageView: UIImageView!
+  var characterPosition: CharacterPosition?
   
   public var skipButton: (() -> Void)?
   var onTapThrough: (() -> Void)?
@@ -105,6 +117,21 @@ open class MaterialShowcase: UIView {
     super.init(frame: frame)
     
     configure()
+  }
+  
+  public init(leftImage: UIImage?,
+              rightImage: UIImage?) {
+      
+      let frame = CGRect(x: 0,
+                         y: 0,
+                         width: UIScreen.main.bounds.width,
+                         height: UIScreen.main.bounds.height)
+      super.init(frame: frame)
+      
+      characterPosition = CharacterPosition(leftImage: leftImage,
+                                            rightImage: rightImage)
+      
+      configure()
   }
   
   // No supported initilization method
@@ -365,6 +392,13 @@ extension MaterialShowcase {
       
       if getTargetPosition(target: targetView, container: containerView) == .above {
          dy *= -1
+        if instructionView.frame.origin.y > IMAGE_SIZE.height + UIApplication.shared.statusBarFrame.height {
+            addCharacter(position: .right)
+        }
+      } else {
+        if UIScreen.main.bounds.height - instructionView.frame.origin.y - instructionView.frame.height > IMAGE_SIZE.height {
+            addCharacter(position: .left)
+        }
       }
 
       backgroundView = UIView(frame: CGRect(x: 0, y: dy, width: radius * 2,height: radius * 2))
@@ -378,6 +412,31 @@ extension MaterialShowcase {
     
     backgroundView.backgroundColor = backgroundPromptColor.withAlphaComponent(backgroundPromptColorAlpha)
     insertSubview(backgroundView, belowSubview: targetRippleView)
+  }
+  
+  private func addCharacter(position: ImagePosition) {
+      var frame = CGRect.zero
+      characterImageView = UIImageView()
+      let bounds = UIScreen.main.bounds
+      
+      switch position {
+      case .left:
+          frame = CGRect(x: 0,
+                         y: bounds.height - IMAGE_SIZE.height,
+                         width: IMAGE_SIZE.width,
+                         height: IMAGE_SIZE.height)
+          characterImageView.image = characterPosition?.leftImage
+      case .right:
+         
+          frame = CGRect(x: bounds.width - IMAGE_SIZE.width,
+                         y: UIApplication.shared.statusBarFrame.height,
+                         width: IMAGE_SIZE.width,
+                         height: IMAGE_SIZE.height)
+          characterImageView.image = characterPosition?.rightImage
+      }
+      
+      characterImageView.frame = frame
+      addSubview(characterImageView)
   }
   
   private func getDefaultBackgroundRadius() -> CGFloat {
