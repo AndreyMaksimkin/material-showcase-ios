@@ -396,7 +396,7 @@ extension MaterialShowcase {
             addCharacter(position: .right)
         }
       } else {
-        if UIScreen.main.bounds.height - instructionView.frame.origin.y - instructionView.frame.height > IMAGE_SIZE.height {
+        if UIScreen.main.bounds.height - targetRippleView.frame.origin.y - targetView.frame.height > IMAGE_SIZE.height - 100 {
             addCharacter(position: .left)
         }
       }
